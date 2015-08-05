@@ -1,7 +1,10 @@
+#!/usr/bin/python
+
 import socket
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentTypeError
 import sys
 from select import select
+import subprocess
 
 host = ""
 port = -1
@@ -9,6 +12,8 @@ name = ""
 sock = None
 
 parser = None
+
+ttyChat, ttyUsers = -1, -1
 
 def colored(string, color):
 	normalizer = "\033[0m"
@@ -22,7 +27,7 @@ def colored(string, color):
 		return "\033[94m" + string + normalizer
 
 def bold(string):
-	return "\e[1m" + string + "\e[21m"
+	return "\033[1m" + string + "\033[21m"
 
 def parseMsg(msg):
 	msg.replace("\BL/", "\033[94m")
@@ -49,12 +54,32 @@ def parseMsg(msg):
 	return msg
 
 def parseArgs():
+	def checkPort(val):
+		val2 = int(val)
+		if val2 < 1024 or val2 > 65536:
+			raise ArgumentTypeError("The port is beyond the acceptable domain.")
+		return val2
+	def checkName(val):
+		if len(val) == 0 or len(val) > 16:
+			raise ArgumentTypeError("The length of the name should be between 1 and 16 characters.")
+		elif val.find("\\") != -1:
+			raise ArgumentTypeError("No backslashes in the name, please.")
+		return val
 	global parser
 	parser = ArgumentParser()
-	parser.add_argument("--host", help="Provide the server's host.", dest="host", action="store", required=True)
-	parser.add_argument("--port", help="Provide the port.", dest="port", action="store", required=True, type=int)
-	parser.add_argument("--name", help="Provide the name.", dest="name", action="store", required=True)
+	parser.add_argument("--host", help="Provide the server's host.", dest="host", action="store", default="localhost", required=True)
+	parser.add_argument("--port", help="Provide the port.", dest="port", action="store", default=4402, required=True, type=checkPort)
+	parser.add_argument("--name", help="Provide the name.", dest="name", action="store", required=True, type=checkName)
 	parser.parse_args()
+
+def setUpWindows():
+
+def cleanUp():
+
+def printToAnotherConsole():
+
+def clearScreen():
+	subprocess.call("clear")
 
 def connect():
 	global host, port, name, sock
@@ -66,16 +91,39 @@ def connect():
 		name = parser.name
 		sock.settimeout(10)
 		sock.connect((host, port))
-		print colored("Connected!", "green")
+		printToAnotherConsole(colored("Connected!", "green"))
+		sys.stdout.write(colored("> ", "yellow"))
+		sys.stdout.flush()
 	except:
+		print bold(colored("Couldn't reach the server, exiting..."))
 		return 1
 
 def interact():
+	global sock, name
+	thePair = [sys.stdin, sock]
+	while 1:
+		read, write, error = select(thePair, [], [])
+		for x in read:
+			if x == sys.stdin:
+				msg = sys.stdin.readline()
+				length = len(msg) + 2
+				msg = parseMsg(msg)
+				x.send(msg)
+			else:
+				printToAnotherConsole()
+				clearScreen()
+				sys.stdout.write("> ")
+				sys.stdout.flush()
 
 def main():
-	if connect() == 1:
-		return 1
-	return interact()
+	try:
+		parseArgs()
+		if connect() == 1:
+			return 1
+		setUpWindows()
+		interact()
+	except KeyboardInterrupt:
+		cleanUp()
 
 if __name__ == "__main__":
 	sys.exit(main())
