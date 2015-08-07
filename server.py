@@ -4,6 +4,9 @@ import socket
 from select import select
 import sys
 
+from time import time
+from datetime import datetime
+
 socks = []
 users = []
 sock = None
@@ -90,7 +93,7 @@ def handleConnections():
 									users[addrs.index(x.getpeername())][1] = data
 									announce("User %s has joined." % data, "onl")
 							else:
-								announce(bold(names[addrs.index(x.getpeername())]) + ": " + data, "msg")
+								announce(bold(datetime.fromtimestamp(time()).strftime("%Y-%m-%d %H:%M:%S") + " " + names[addrs.index(x.getpeername())]) + ": " + data, "msg")
 						else:
 							if x in socks:
 								socks.remove(x)
