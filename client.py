@@ -91,6 +91,13 @@ def connect():
 		name = parser.name
 		sock.settimeout(10)
 		sock.connect((host, port))
+		sock.send(name)
+		data = sock.recv(maxbuf)
+		while data == "\n":
+			sys.stdout.write("The name is taken already, choose another one: ")
+			name = sys.stdin.readline()
+			sock.send(name)
+			data = sock.recv(maxbuf)
 		printToAnotherConsole(colored("Connected!", "green"))
 		sys.stdout.write(colored("> ", "yellow"))
 		sys.stdout.flush()
@@ -110,6 +117,7 @@ def interact():
 				msg = parseMsg(msg)
 				x.send(msg)
 			else:
+				data = sock.recv(maxbuf)
 				printToAnotherConsole()
 				clearScreen()
 				sys.stdout.write("> ")
