@@ -55,8 +55,11 @@ def parseMsg(msg):
 
 def parseArgs():
 	def checkPort(val):
-		val2 = int(val)
-		if val2 < 1024 or val2 > 65536:
+		try:
+			val2 = int(val)
+		except TypeError:
+			print "This value should be an integer between 1024 and 65535 inclusively."
+		if val2 < 1024 or val2 > 65535:
 			raise ArgumentTypeError("The port is beyond the acceptable domain.")
 		return val2
 	def checkName(val):
