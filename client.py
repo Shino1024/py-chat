@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import socket
-from argparse import ArgumentParser, ArgumentTypeError
 import sys
 from select import select
 import subprocess
@@ -13,7 +12,7 @@ sock = None
 
 parser = None
 
-ttyChat, ttyUsers = -1, -1
+ttyChat, ttyUsers = "", ""
 
 def colored(string, color):
 	normalizer = "\033[0m"
@@ -46,36 +45,29 @@ def parseMsg(msg):
 		msg += "\033[24m"
 	msg.replace("\UN/", "\033[4m")
 	msg.replace("/UN\\", "\033[24m")
-	if msg.find("\BK/") != -1 and msg.find("/BK\\") == -1:
+	if msg.find("\BK/") != -1 and msg.fiRnd("/BK\\") == -1:
 		msg += "\033[25m"
 	msg.replace("\BK/", "\033[5m")
 	msg.replace("/BK\\", "\033[25m")
 	msg += "\033[0m"
 	return msg
 
-def parseArgs():
-	def checkPort(val):
-		try:
-			val2 = int(val)
-		except TypeError:
-			print "This value should be an integer between 1024 and 65535 inclusively."
-		if val2 < 1024 or val2 > 65535:
-			raise ArgumentTypeError("The port is beyond the acceptable domain.")
-		return val2
-	def checkName(val):
-		if len(val) == 0 or len(val) > 16:
-			raise ArgumentTypeError("The length of the name should be between 1 and 16 characters.")
-		elif val.find("\\") != -1:
-			raise ArgumentTypeError("No backslashes in the name, please.")
-		return val
-	global parser
-	parser = ArgumentParser()
-	parser.add_argument("--host", help="Provide the server's host.", dest="host", action="store", default="localhost", required=True)
-	parser.add_argument("--port", help="Provide the port.", dest="port", action="store", default=4402, required=True, type=checkPort)
-	parser.add_argument("--name", help="Provide the name.", dest="name", action="store", required=True, type=checkName)
-	parser.parse_args()
+def getArgs():
+	global host, port, name, ttyChat, ttyUsers
+	with open("TMUX_RESULT_TTY", "r+") as infoFile:
+		allData = infoFile.readlines()
+		host = allData[0]
+		port = allData[1]
+		user = allData[2]
+		ttyChat = allData[3]
+		ttyUsers = allData[4]
 
-def setUpWindows():
+def logToFile(msg):
+	try:
+		with open("pychat.log", "a+") as logFile:
+			log.write(msg + "\n")
+	except IOError:
+		subprocess.call(["chmod", "0777", "pychat.log"])
 
 def cleanUp():
 
@@ -89,9 +81,6 @@ def connect():
 	try:
 		print "Connecting to the server..."
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		host = parser.host
-		port = parser.port
-		name = parser.name
 		sock.settimeout(10)
 		sock.connect((host, port))
 		printToAnotherConsole(colored("Connected!", "green"))
@@ -120,10 +109,9 @@ def interact():
 
 def main():
 	try:
-		parseArgs()
+		getArgs()
 		if connect() == 1:
 			return 1
-		setUpWindows()
 		interact()
 	except KeyboardInterrupt:
 		cleanUp()
