@@ -16,6 +16,7 @@ fi
 if [[ ! $USER =~ [A-Za-z0-9]{1,16} ]]; then
 	echo "The username should consist of alphabet characters or numbers, between 1 and 16 characters."
 	return 2
+fi
 
 > TMUX_RESULT_TTY
 SHOST >> TMUX_RESULT_TTY
