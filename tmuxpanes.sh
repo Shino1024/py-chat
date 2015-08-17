@@ -4,25 +4,31 @@ HOST=$1
 PORT=$2
 USER=$3
 
-if [[ $PORT =~ ^([1-9][0-9]{,3}|[1-6][0-9]{,4})$ ]]; then
-	if [ "$PORT" -lt 1024 ] || [ "$PORT" -gt 65536 ]; then
-		echo "The port should be between 1024 and 65536."
-		return 1
-	fi
-else
-	echo "The port should be a number between 1024 and 65536."
+if [ "$#" -ne 3 ]; then
+	echo -e "Illegal number of arguments. Usage:\n\t$0 host port name"
 	return 1
 fi
 
-if [[ ! $USER =~ [A-Za-z0-9]{1,16} ]]; then
-	echo "The username should consist of alphabet characters or numbers, between 1 and 16 characters."
+if [[ $PORT =~ ^([1-9][0-9]{3}|[1-6][0-9]{4})$ ]]; then
+	if [ "$PORT" -lt 1024 ] || [ "$PORT" -gt 65536 ]; then
+		echo "The port should be between 1024 and 65536."
+		return 2
+	fi
+else
+	echo "The port should be a number between 1024 and 65536."
 	return 2
 fi
 
+if [[ ! $USER =~ ^[A-Za-z0-9]{1,16}$ ]]; then
+	echo "The username should consist of alphabet characters or numbers, between 1 and 16 characters."
+	return 3
+fi
+
 > TMUX_RESULT_TTY
-SHOST >> TMUX_RESULT_TTY
-$PORT >> TMUX_RESULT_TTY
-$USER >> TMUX_RESULT_TTY
+> DATA_CHATTER
+SHOST >> DATA_CHATTER
+$PORT >> DATA_CHATTER
+$USER >> DATA_CHATTER
 
 clear
 
@@ -74,5 +80,17 @@ tmux send-keys -t 1 "exec &>/dev/null" Enter
 tmux send-keys -t 1 "clear" Enter
 tmux send-keys -t 2 "python client.py" Enter
 tmux select-pane -t 2
+
+TTY_CHAT=$(sed '1q;d' TMUX_RESULT_TTY)
+TTY_USERS=$(sed '2q;d' TMUX_RESULT_TTY)
+
+> REDIRECTION_FILE_CHAT
+> REDIRECTION_FILE_USERS
+echo "#!/bin/bash" >> REDIRECTION_FILE_CHAT
+echo "echo -e \$1 > $TTY_CHAT" >> REDIRECTION_FILE_CHAT
+echo "#!/bin/bash" >> REDIRECTION_FILE_USERS
+echo "echo -e \$1 > $TTY_USERS" >> REDIRECTION_FILE_USERS
+
+rm TMUX_RESULT_TTY
 
 tmux attach
