@@ -30,10 +30,13 @@ def colored(string, color):
 def bold(string):
 	return "\e[1m" + string + "\e[21m"
 
+def escapeCharacters(msg):
+	return msg.replace("\\", "\\\\").replace("$", "\\$")
+
 def start():
 	global sock, port, maxusers, socks, maxbuf, host
 	try:
-		print "Creating the server..."
+		print bold("Creating the server...")
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		print "dbg"
 		sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
