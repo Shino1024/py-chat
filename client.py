@@ -10,10 +10,6 @@ port = -1
 name = ""
 sock = None
 
-parser = None
-
-ttyChat, ttyUsers = "", ""
-
 def colored(string, color):
 	normalizer = "\033[0m"
 	if color == "red":
@@ -59,19 +55,21 @@ def getArgs():
 		host = allData[0]
 		port = allData[1]
 		user = allData[2]
-		ttyChat = allData[3]
-		ttyUsers = allData[4]
 
 def logToFile(msg):
 	try:
-		with open("pychat.log", "a+") as logFile:
-			log.write(msg + "\n")
+		with open("dragonchat.log", "a+") as logFile:
+			logFile.write(msg + "\n")
 	except IOError:
-		subprocess.call(["chmod", "0777", "pychat.log"])
+		subprocess.call(["chmod", "0600", "dragonchat.log"])
 
 def cleanUp():
+	global sock
+	sock.close()
+	subprocess.call(["tmux", "kill-session", "-t", "dragonchat"])
 
-def printToAnotherConsole():
+def printToAnotherConsole(msg, tty):
+	subprocess.call(["./redirection.sh", "REDIRECTION_FILE_" + tty])
 
 def clearScreen():
 	subprocess.call("clear")
