@@ -4,6 +4,7 @@ import socket
 import sys
 from select import select
 import subprocess
+from os import remove
 
 host = ""
 port = -1
@@ -55,6 +56,9 @@ def getArgs():
 		host = allData[0]
 		port = allData[1]
 		user = allData[2]
+		ttyChat = allData[3]
+		ttyUsers = allData[4]
+	os.remove("TMUX_RESULT_TTY")
 
 def logToFile(msg):
 	try:
@@ -69,10 +73,15 @@ def cleanUp():
 	subprocess.call(["tmux", "kill-session", "-t", "dragonchat"])
 
 def printToAnotherConsole(msg, tty):
-	subprocess.call(["./redirection.sh", "REDIRECTION_FILE_" + tty])
+	with open("REDIRECTION_FILE_" + tty, "w+") as inputFile:
+		if tty == "USERS":
+			inputFile.write("#!/bin/bash\necho -e '" + msg + "' > " + ttyUsers)
+		elif tty == "CHAT":
+			inputFile.write("#!/bin/bash\necho -e '" + msg + "' > " + ttyChat)
+	subprocess.call(["./REDIRECTION_FILE_" + tty])
 
 def clearScreen():
-	subprocess.call("clear")
+	subprocess.call(["clear"])
 
 def connect():
 	global host, port, name, sock

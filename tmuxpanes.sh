@@ -60,7 +60,7 @@ printf "\\____/_/ /_/\\__,_/\\__/\\__/\\___/_/       \n"
 
 sleep 2
 
-tmux new-session -d -s pychat
+tmux new-session -d -s dragonchat
 tmux bind-key -n C-Right resize-pane -R 1
 tmux bind-key -n C-Left resize-pane -L 1
 tmux bind-key -n C-Up resize-pane -U 1
@@ -86,10 +86,8 @@ TTY_USERS=$(sed '2q;d' TMUX_RESULT_TTY)
 
 > REDIRECTION_FILE_CHAT
 > REDIRECTION_FILE_USERS
-echo "#!/bin/bash" >> REDIRECTION_FILE_CHAT
-echo "echo -e \$1 > $TTY_CHAT" >> REDIRECTION_FILE_CHAT
-echo "#!/bin/bash" >> REDIRECTION_FILE_USERS
-echo "echo -e \$1 > $TTY_USERS" >> REDIRECTION_FILE_USERS
+chmod 0600 REDIRECTION_FILE_CHAT
+chmod 0600 REDIRECTION_FILE_USERS
 
 rm TMUX_RESULT_TTY
 
