@@ -26,26 +26,20 @@ def bold(string):
 	return "\033[1m" + string + "\033[21m"
 
 def parseMsg(msg):
-	msg.replace("\BL/", "\033[94m")
-	msg.replace("/BL\\", "\033[94m")
-	msg.replace("\YE/", "\033[93m")
-	msg.replace("/YE\\", "\033[93m")
-	msg.replace("\RE/", "\033[91m")
-	msg.replace("/RE\\", "\033[91m")
-	msg.replace("\GR/", "\033[92m")
-	msg.replace("/GR\\", "\033[92m")
-	if msg.find("\BO/") != -1 and msg.find("/BO\\") == -1:
-		msg += "\033[21m"
-	msg.replace("\BO/", "\033[1m")
-	msg.replace("/BO\\", "\033[21m")
-	if msg.find("\UN/") != -1 and msg.find("/UN\\") == -1:
-		msg += "\033[24m"
-	msg.replace("\UN/", "\033[4m")
-	msg.replace("/UN\\", "\033[24m")
-	if msg.find("\BK/") != -1 and msg.fiRnd("/BK\\") == -1:
-		msg += "\033[25m"
-	msg.replace("\BK/", "\033[5m")
-	msg.replace("/BK\\", "\033[25m")
+	msg.replace("~BL~", "\033[94m").replace("~bL~", "\033[94m").replace("~Bl~", "\033[94m").replace("~bl~", "\033[94m")
+	msg.replace("~/BL~", "\033[0m").replace("~/bL~", "\033[0m").replace("~/Bl~", "\033[0m").replace("~/bl~", "\033[0m")
+	msg.replace("~YE~", "\033[93m").replace("~yE~", "\033[93m").replace("~Ye~", "\033[93m").replace("~ye~", "\033[93m")
+	msg.replace("~/YE~", "\033[0m").replace("~/yE~", "\033[0m").replace("~/Ye~", "\033[0m").replace("~/ye~", "\033[0m")
+	msg.replace("~RE~", "\033[91m").replace("~rE~", "\033[91m").replace("~Re~", "\033[91m").replace("~re~", "\033[91m")
+	msg.replace("~/RE~", "\033[0m").replace("~/rE~", "\033[0m").replace("~/Re~", "\033[0m").replace("~/re~", "\033[0m")
+	msg.replace("~GR~", "\033[92m").replace("~gR~", "\033[92m").replace("~Gr~", "\033[92m").replace("~gr~", "\033[92m")
+	msg.replace("~/GR~", "\033[0m").replace("~/gR~", "\033[0m").replace("~/Gr~", "\033[0m").replace("~/gr~", "\033[0m")
+	msg.replace("~BO~", "\033[1m").replace("~bO~", "\033[1m").replace("~Bo~", "\033[1m").replace("~go~", "\033[1m")
+	msg.replace("~/BO~", "\033[21m").replace("~/bO~", "\033[21m").replace("~/Bo~", "\033[21m").replace("~/bo~", "\033[21m")
+	msg.replace("~UN~", "\033[4m").replace("~uN~", "\033[4m").replace("~Un~", "\033[4m").replace("~un~", "\033[4m")
+	msg.replace("~/UN~", "\033[24m").replace("~/uN~", "\033[24m").replace("~/Un~", "\033[24m").replace("~/un~", "\033[24m")
+	msg.replace("~BK~", "\033[5m").replace("~bK~", "\033[5m").replace("~Bk~", "\033[5m").replace("~bk~", "\033[5m")
+	msg.replace("~/BK~", "\033[25m").replace("~/bK~", "\033[25m").replace("~/Bk~", "\033[25m").replace("~/bk~", "\033[25m")
 	msg += "\033[0m"
 	return msg
 
@@ -58,7 +52,7 @@ def getArgs():
 		user = allData[2]
 		ttyChat = allData[3]
 		ttyUsers = allData[4]
-	os.remove("TMUX_RESULT_TTY")
+	remove("TMUX_RESULT_TTY")
 
 def logToFile(msg):
 	try:
@@ -69,15 +63,18 @@ def logToFile(msg):
 
 def cleanUp():
 	global sock
+	print colored("Exiting...", "blue")
 	sock.close()
 	subprocess.call(["tmux", "kill-session", "-t", "dragonchat"])
+	remove("REDIRECTION_FILE_CHAT")
+	remove("REDIRECTION_FILE_USERS")
 
 def printToAnotherConsole(msg, tty):
 	with open("REDIRECTION_FILE_" + tty, "w+") as inputFile:
 		if tty == "USERS":
-			inputFile.write("#!/bin/bash\necho -e '" + msg + "' > " + ttyUsers)
+			inputFile.write("#!/bin/bash\necho -e '" + repr(msg) + "' > " + ttyUsers)
 		elif tty == "CHAT":
-			inputFile.write("#!/bin/bash\necho -e '" + msg + "' > " + ttyChat)
+			inputFile.write("#!/bin/bash\necho -e '" + repr(msg) + "' > " + ttyChat)
 	subprocess.call(["./REDIRECTION_FILE_" + tty])
 
 def clearScreen():
@@ -105,7 +102,7 @@ def interact():
 		for x in read:
 			if x == sys.stdin:
 				msg = sys.stdin.readline()
-				length = len(msg) + 2
+#				length = len(msg) + 2
 				msg = parseMsg(msg)
 				x.send(msg)
 			else:

@@ -11,16 +11,16 @@ fi
 
 if [[ $PORT =~ ^([1-9][0-9]{3}|[1-6][0-9]{4})$ ]]; then
 	if [ "$PORT" -lt 1024 ] || [ "$PORT" -gt 65536 ]; then
-		echo "The port should be between 1024 and 65536."
+		echo -e "The port should be between 1024 and 65536. Usage:\n\t$0 host port name"
 		return 2
 	fi
 else
-	echo "The port should be a number between 1024 and 65536."
+	echo -e "The port should be a number between 1024 and 65536. Usage:\n\t$0 host port name"
 	return 2
 fi
 
 if [[ ! $USER =~ ^[A-Za-z0-9]{1,16}$ ]]; then
-	echo "The username should consist of alphabet characters or numbers, between 1 and 16 characters."
+	echo -e "The username should consist of alphabet characters or numbers, between 1 and 16 characters. Usage:\n\t$0 host port name"
 	return 3
 fi
 

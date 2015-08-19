@@ -31,7 +31,7 @@ def bold(string):
 	return "\e[1m" + string + "\e[21m"
 
 def escapeCharacters(msg):
-	return msg.replace("\\", "\\\\").replace("$", "\\$")
+	return msg.replace("`", "\`").replace("$", "\$")
 
 def start():
 	global sock, port, maxusers, socks, maxbuf, host
